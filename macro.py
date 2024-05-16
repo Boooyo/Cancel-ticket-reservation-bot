@@ -14,8 +14,6 @@ from PyQt4.QtGui import *
 from PyQt4 import QtGui, QtCore
 import time
 
-# 개발자 : 박건희, 오수빈 (수정 : 박건희)
-
 # test 파일 만드는 함수
 def makeTest(testStr):
     test = open("test.html", "w", encoding="utf-8")
