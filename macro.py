@@ -4,9 +4,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import time
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import logging
 
 # 로그 설정
@@ -28,7 +25,7 @@ def handle_alert(driver):
     except:
         pass
 
-def select_seat(driver, seat, cbCheck):
+def select_seat(seat, cbCheck):
     seat_grade = seat['alt'][seat['alt'].find('[') + 1:]
     return (
         (seat_grade.find("VIP") != -1 and cbCheck[0] == 1) or
@@ -58,7 +55,7 @@ def find_empty_seat(driver, cbCheck):
         bs4 = BeautifulSoup(driver.page_source, "html.parser")
         area_list = bs4.findAll('area')
 
-        for i, area in enumerate(area_list):
+        for area in area_list:
             driver.execute_script(area["href"])
             time.sleep(0.5)
             handle_alert(driver)
@@ -73,12 +70,7 @@ def select_ticket(driver, userTicket):
     bs4 = BeautifulSoup(driver.page_source, "html.parser")
     ticket_list = bs4.findAll('select')
 
-    for ticket in ticket_list:
-        if userTicket in ticket["pricegradename"]:
-            elem = ticket["index"]
-            break
-    else:
-        elem = '01'
+    elem = next((ticket["index"] for ticket in ticket_list if userTicket in ticket["pricegradename"]), '01')
 
     try:
         driver.find_element(By.XPATH, f"//td[@class='taL']//select[@index='{elem}']//option[@value='1']").click()
@@ -88,7 +80,7 @@ def select_ticket(driver, userTicket):
     driver.switch_to.default_content()
     driver.execute_script("javascript:fnNextStep('P');")
     handle_alert(driver)
-    log("가격/할인선택")
+    log("가격/할인 선택")
     time.sleep(0.5)
 
 def confirm_order_info(driver, userNum):
@@ -212,4 +204,4 @@ if __name__ == "__main__":
     userNum = "주민번호 앞 6자리"
     userBank = "은행 코드"
     cbCheck = [1, 0, 0, 0, 1]  # 예시: VIP 좌석 또는 아무 좌석
-    main(userTicket, userNum, userBank, cbCheck)
+    main(userTicket, userNum,
